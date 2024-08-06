@@ -1,6 +1,7 @@
 <?php
 
-function emptyInputSignup($name, $email, $username, $pwd, $pwdRepeat) {
+function emptyInputSignup($name, $email, $username, $pwd, $pwdRepeat)
+{
 
     if (empty($name) || empty($email) || empty($username) || empty($pwd) || empty($pwdRepeat)) {
         $result = true;
@@ -10,8 +11,9 @@ function emptyInputSignup($name, $email, $username, $pwd, $pwdRepeat) {
     return $result;
 }
 
-function invalidUid($username) {
-    
+function invalidUid($username)
+{
+
     if (!preg_match("/^[a-zA-Z0-9]*$/", $username)) {
         $result = true;
     } else {
@@ -20,8 +22,9 @@ function invalidUid($username) {
     return $result;
 }
 
-function invalidEmail($email) {
-    
+function invalidEmail($email)
+{
+
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $result = true;
     } else {
@@ -30,8 +33,9 @@ function invalidEmail($email) {
     return $result;
 }
 
-function pwdMatch($pwd, $pwdRepeat) {
-    
+function pwdMatch($pwd, $pwdRepeat)
+{
+
     if ($pwd !== $pwdRepeat) {
         $result = true;
     } else {
@@ -40,7 +44,8 @@ function pwdMatch($pwd, $pwdRepeat) {
     return $result;
 }
 
-function uidExists($conn, $username, $email) {
+function uidExists($conn, $username, $email)
+{
     $sql = "SELECT * FROM users WHERE usersUid = ? OR usersEmail = ?;";
     $stmt = mysqli_stmt_init($conn);
 
@@ -64,7 +69,8 @@ function uidExists($conn, $username, $email) {
     mysqli_stmt_close($stmt);
 }
 
-function createUser($conn, $name, $email, $username, $pwd) {
+function createUser($conn, $name, $email, $username, $pwd)
+{
     $sql = "INSERT INTO users (usersName, usersEmail, usersUid, usersPwd) VALUES (?, ?, ?, ?)";
     $stmt = mysqli_stmt_init($conn);
 
@@ -80,4 +86,41 @@ function createUser($conn, $name, $email, $username, $pwd) {
     mysqli_stmt_close($stmt);
     header("location: ../signup.php?error=none");
     exit();
+}
+
+
+//function for loginUser
+function emptyInputLogin($username, $pwd)
+{
+
+    if (empty($username) || empty($pwd)) {
+        $result = true;
+    } else {
+        $result = false;
+    }
+    return $result;
+}
+
+function loginUser($conn, $username, $pwd)
+{
+    $uidExists = uidExists($conn, $username, $username);
+
+    if ($uidExists === false) {
+        header("location: ../login.php?error=wrongLogin");
+        exit();
+    }
+
+    $pwdHashed = $uidExists["usersPwd"];
+    $checkPwd = password_verify($pwd, $pwdHashed);
+
+    if ($checkPwd === false) {
+        header("location: ../login.php?error=wrongLogin");
+        exit();
+    } else if ($checkPwd === true) {
+        session_start();
+        $_SESSION["userid"] = $uidExists["usersId"];
+        $_SESSION["useruid"] = $uidExists["usersUid"];
+        header("location: ../index.php");
+        exit();
+    }
 }
