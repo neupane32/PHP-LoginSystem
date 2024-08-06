@@ -9,6 +9,15 @@ include_once 'header.php';
         <input type="password" name="pwd" placeholder="Password...">
         <button type="submit" name="submit">Log In</button>
     </form>
+    <?php
+    if (isset($_GET["error"])) {
+        if ($_GET["error"] == "emptyinput") {
+            echo "<p>Fill in all fields !</p>";
+        } else if ($_GET["error"] == "wrongLogin") {
+            echo "<p>Incorrect login information !</p>";
+        }
+    }
+    ?>
 </section>
 
 <?php
